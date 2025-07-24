@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Személyforgalom ki- és belépők száma</title>
+<title>OSAP 1222 - Személyforgalom ki- és belépők száma</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -29,6 +29,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./https://map.ksh.hu/timea/images/shortcut.ico" rel="icon">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -142,7 +143,7 @@ if (FALSE) {
 
    output$bordercity &lt;- renderUI({
      
-    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP_1222_Github_Pages/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
       
     DATA$MHO &lt;- str_pad(DATA$MHO, width = 2, pad = "0")
     DATA$DATE &lt;- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
@@ -160,7 +161,7 @@ if (FALSE) {
    
    output$search &lt;- renderUI({
      
-    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP_1222_Github_Pages/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
      
     DATA$MHO &lt;- str_pad(DATA$MHO, width = 2, pad = "0")
     DATA$DATE &lt;- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
@@ -180,7 +181,7 @@ if (FALSE) {
      req(input$bordercity)
      req(input$search)
      
-    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+    DATA &lt;- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP_1222_Github_Pages/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
      
     DATA$MHO &lt;- str_pad(DATA$MHO, width = 2, pad = "0")
     DATA$DATE &lt;- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
