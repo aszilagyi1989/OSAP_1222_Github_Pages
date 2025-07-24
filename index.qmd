@@ -1,0 +1,148 @@
+---
+title: ""
+format: 
+  html:
+    page-layout: full
+    resources: 
+      - shinylive-sw.js
+filters: 
+ - shinylive
+---
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 600
+library("shiny")
+library("bslib")
+library("dplyr")
+library("stringr")
+library("lubridate")
+library("shinyWidgets")
+library("plotly")
+library("ggplot2")
+
+if (FALSE) {
+  library("munsell")
+}
+
+
+ ui <- page_sidebar(
+   
+   setBackgroundColor(
+    color = c("#F7FBFF", "#2171B5"),
+    gradient = "linear", # 
+    direction = "bottom"
+  ),
+  
+   titlePanel("Személyforgalom ki- és belépők száma 2025-ben"),
+   sidebar = sidebar(
+     width = 300,
+       dateRangeInput(
+          inputId = "date",
+          label = "Időszak kiválasztása",
+          start = ymd("2019-01-01"),
+          end = ymd(paste(str_sub(Sys.Date(), 1, 4), str_sub(Sys.Date(), 6, 7), "01", sep = "-")),
+          min = ymd("2019-01-01"),
+          max = ymd(paste(str_sub(Sys.Date(), 1, 4), str_sub(Sys.Date(), 6, 7), "01", sep = "-"))
+       ),
+       uiOutput("bordercity"),
+       uiOutput("search")
+  ),
+  card(
+      plotlyOutput("linechart")
+  )
+ )
+
+
+ server <- function(input, output) {
+
+   output$bordercity <- renderUI({
+     
+    DATA <- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+      
+    DATA$MHO <- str_pad(DATA$MHO, width = 2, pad = "0")
+    DATA$DATE <- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
+    DATA %>% select(-c(TEV, MHO)) %>% group_by(DATE, MG05, MG58) %>% summarise(GADC041 = sum(GADC041)) %>% arrange(DATE, MG05, MG58) -> DATA
+
+
+     selectInput(
+       "bordercity",
+       "Határátkelőhely",
+       choices = unique(DATA$MG05),
+       selected = unique(DATA$MG05)[1]
+       )
+
+   })
+   
+   output$search <- renderUI({
+     
+    DATA <- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+     
+    DATA$MHO <- str_pad(DATA$MHO, width = 2, pad = "0")
+    DATA$DATE <- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
+    
+    selectInput(
+      "search", 
+      "Keresés",
+      choices = c("Összes állampolgárság", unique(DATA[DATA$MG05 == input$bordercity & DATA$DATE >= input$date[[1]] & DATA$DATE <= input$date[[2]], "MG02"])), 
+      selected = "Összes állampolgárság")
+    
+  })
+
+  
+   subsetted <- reactive({
+     
+     req(input$date)
+     req(input$bordercity)
+     req(input$search)
+     
+    DATA <- read.csv("https://raw.githubusercontent.com/aszilagyi1989/OSAP1222_Quarto_Shinylive_SzemelyLineChart_2025_R/refs/heads/main/Data.csv", sep = ";", row.names = NULL)
+     
+    DATA$MHO <- str_pad(DATA$MHO, width = 2, pad = "0")
+    DATA$DATE <- ymd(paste(DATA$TEV, DATA$MHO, "01", sep = ";"))
+    
+  if (input$search != "Összes állampolgárság"){
+    
+    DATA %>% select(-c(TEV, MHO)) %>% arrange(DATE, MG05, MG02, MG58) -> DATA
+    
+    DATA %>% filter(DATE >= input$date[[1]] & DATE <= input$date[[2]] & MG02 %in% input$search & MG05 %in% input$bordercity )
+   
+  }else{
+    
+    DATA %>% select(-c(TEV, MHO)) %>% group_by(DATE, MG05, MG58) %>% summarise(GADC041 = sum(GADC041)) %>% arrange(DATE, MG05, MG58) -> DATA
+    DATA %>% filter(DATE >= input$date[[1]] & DATE <= input$date[[2]] & MG05 %in% input$bordercity)
+    
+  }
+ 
+   })
+  
+  
+  output$linechart <- renderPlotly({
+    
+     req(input$date)
+     req(input$bordercity)
+     req(input$search)
+     
+    tryCatch({
+      
+      map <- ggplot(data = subsetted(), aes(DATE, GADC041, colour = MG58)) + geom_line() + labs(x = "Dátum", y = "Forgalom", colour = "Irány")
+      ggplotly(map) 
+      # %>%
+      #   layout(xaxis = list(autorange = TRUE),
+      #          yaxis = list(autorange = TRUE))
+       
+       },
+       error = function(error_message){
+         
+         NULL
+         
+     })
+     
+  })
+
+
+
+}
+
+shinyApp(ui = ui, server = server)
+```
